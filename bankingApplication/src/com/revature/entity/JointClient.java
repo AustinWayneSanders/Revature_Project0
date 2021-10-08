@@ -1,8 +1,8 @@
 package com.revature.entity;
 
-import java.util.Date;
+import java.sql.Date;
 
-public class Client {
+public class JointClient {
 
 	private int clientId;
 	private String firstName;
@@ -15,16 +15,17 @@ public class Client {
 	private String race;
 	private String street;
 	private String city;
-	private String state;
-	private int postalCode;
+	private String postalCode;
 	private Date dateJoined; 
-
-	public Client() {
+	private int primaryClientId;
+	
+	public JointClient() {
 		super();
 	}
 
-	public Client(int clientId, String firstName, String lastName, String userName, String password, String email,
-			int age, String gender, String race, String street, String city, String state, int postalCode, Date dateJoined) {
+	public JointClient(int clientId, String firstName, String lastName, String userName, String password, String email,
+			int age, String gender, String race, String street, String city, String postalCode, Date dateJoined,
+			int primaryClientId) {
 		super();
 		this.clientId = clientId;
 		this.firstName = firstName;
@@ -37,9 +38,9 @@ public class Client {
 		this.race = race;
 		this.street = street;
 		this.city = city;
-		this.state = state;
 		this.postalCode = postalCode;
 		this.dateJoined = dateJoined;
+		this.primaryClientId = primaryClientId;
 	}
 
 	public int getClientId() {
@@ -130,19 +131,11 @@ public class Client {
 		this.city = city;
 	}
 
-	public String getState() {
-		return state;
-	}
-
-	public void setState(String state) {
-		this.state = state;
-	}
-
-	public int getPostalCode() {
+	public String getPostalCode() {
 		return postalCode;
 	}
 
-	public void setPostalCode(int postalCode) {
+	public void setPostalCode(String postalCode) {
 		this.postalCode = postalCode;
 	}
 
@@ -154,13 +147,21 @@ public class Client {
 		this.dateJoined = dateJoined;
 	}
 
-	@Override
-	public String toString() {
-		return "Client [clientId=" + clientId + ", firstName=" + firstName + ", lastName=" + lastName + ", userName="
-				+ userName + ", password=" + password + ", email=" + email + ", age=" + age + ", gender=" + gender
-				+ ", race=" + race + ", street=" + street + ", city=" + city + ", state=" + state + ", postalCode=" + postalCode
-				+ ", dateJoined=" + dateJoined + "]";
+	public int getPrimaryClientId() {
+		return primaryClientId;
 	}
 
+	public void setPrimaryClientId(int primaryClientId) {
+		this.primaryClientId = primaryClientId;
+	}
+
+	@Override
+	public String toString() {
+		return "JointClient [clientId=" + clientId + ", firstName=" + firstName + ", lastName=" + lastName
+				+ ", userName=" + userName + ", password=" + password + ", email=" + email + ", age=" + age
+				+ ", gender=" + gender + ", race=" + race + ", street=" + street + ", city=" + city + ", postalCode="
+				+ postalCode + ", dateJoined=" + dateJoined + ", primaryClientId=" + primaryClientId + "]";
+	}
+	
 	
 }
