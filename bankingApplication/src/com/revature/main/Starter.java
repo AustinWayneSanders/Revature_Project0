@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,8 +26,8 @@ public class Starter {
 	private static Statement statement = null;
 	private static PreparedStatement preparedStmt = null;
 	private static ResultSet result = null;
-	ResultSetMetaData rsmd = null;
-	Scanner input = new Scanner(System.in);
+	private static java.sql.ResultSetMetaData rsmd = null;
+	private static Scanner input = new Scanner(System.in);
 
 	public static void connect() throws Exception {
 		Class.forName("com.mysql.cj.jdbc.Driver");
@@ -39,7 +40,7 @@ public class Starter {
 		String insertQuery = "INSERT INTO client (`FirstName`, `LastName`, `UserName`,`Password`,"
 				+ "`Email`, `Age`, `Gender`, `Race`, `Street`, `City`, `State`, "
 				+ "`PostalCode`, `DateJoined`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?);";
-		System.out.print(insertQuery);
+	
 		preparedStmt = connection.prepareStatement(insertQuery.toString());
 
 		preparedStmt.setString(1, client.getFirstName());
@@ -61,38 +62,46 @@ public class Starter {
 
 		return insertStatus;
 	}
-
+	
+	private static int counter = 1;
 	public static boolean loginUser(String userName, String password) throws SQLException {
 		boolean validCredentials = false;
-		String readCredentialsQuery = "SELECT COUNT(*) FROM `client` WHERE `userName` = '"+ userName +"' AND `password` = '" + password +"';";
+		String readCredentialsQuery = "SELECT COUNT(*) AS Count FROM `client` WHERE `userName` = '"+ userName +"' AND `password` = '" + password +"';";
 		statement = connection.createStatement();
-		System.out.println(readCredentialsQuery);
-//		preparedStmt.setString(1, userName);
-//		preparedStmt.setString(2,password);
 		result = statement.executeQuery(readCredentialsQuery);
+		result.next();
+		int value = result.getInt("Count");
 
-		int counter = 1;
-		
-
-		while (counter < 3) {
-			if (result.toString() == "1") {
+		while (counter < 4) {
+			if (result.getInt("Count") == 1) {
 				counter = 3;
 				validCredentials = true;
-			} else {
-				System.out.print("Invalid User\n Try again.");
+			} else if(counter < 3 && counter > 0) {
+				System.out.print("Invalid User\n Try again.\n\n");
+				System.out.println("Enter your username:");
+				String userNameValidation = input.nextLine();
+				System.out.println("Enter your password:");
+				String passwordValidation = input.nextLine();
 				counter++;
+				Starter.loginUser(userNameValidation, passwordValidation);
+				
 				validCredentials = false;
-
+			} else {
+				//System.out.print("Maximum Attempts Exceeded.");
+				throw new UserCredentialsNotValid("Exceded maximum attemps.");
 			}
 		}
 		return validCredentials;
 	}
 	
 	public static String userName(String userName, String password) throws SQLException {
-		String readName = "SELECT firstName FROM client WHERE userName = ? AND password = ?;";
+		String readName = "SELECT `firstName` FROM `client` WHERE `userName` = '"+userName+"' AND password = '"+password+"';";
 		statement = connection.createStatement();
 		result = statement.executeQuery(readName);
-		return result.toString();
+		result.next();
+//		rsmd = result.getMetaData();
+//		String name = rsmd.getColumnName(1);
+		return result.getString("firstName");
 	}
 
 	public static void closeResource() throws Exception {
@@ -116,7 +125,7 @@ public class Starter {
 //			String name = "Austin";
 //			String userName = "austin";
 //			String password = "password";
-		Scanner input = new Scanner(System.in);
+//		Scanner input = new Scanner(System.in);
 		Starter.connect();
 		int choice = 0;
 		// while (choice >=0) {
@@ -138,9 +147,9 @@ public class Starter {
 			// Scanner input2 = new Scanner(System.in);
 
 			System.out.println("Enter your username:");
-			String userNameValidation = input.next();
+			String userNameValidation = input.nextLine();
 			System.out.println("Enter your password:");
-			String passwordValidation = input.next();
+			String passwordValidation = input.nextLine();
 			Boolean validUser = Starter.loginUser(userNameValidation, passwordValidation);
 			if (validUser) {
 				System.out.println("Welcome " + Starter.userName(userNameValidation, passwordValidation) + ". What would you like to do?\n");
@@ -151,6 +160,7 @@ public class Starter {
 				System.out.println("Enter you choice [1-3]:");
 
 				choice = input.nextInt();
+				input.nextLine();
 			} 
 				//else {
 //				input.close();
