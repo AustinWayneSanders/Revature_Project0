@@ -2,7 +2,7 @@ package com.revature.entity;
 
 public class Account {
 	private int accountNumber;
-	private String accountType;
+	private int accountTypeID;
 	private float balance;
 	private int clientID;
 	
@@ -10,10 +10,10 @@ public class Account {
 		super();
 	}
 
-	public Account(int accountNumber, String accountType, float balance, int clientID) {
+	public Account(int accountNumber, int accountTypeID, float balance, int clientID) {
 		super();
 		this.accountNumber = accountNumber;
-		this.accountType = accountType;
+		this.accountTypeID = accountTypeID;
 		this.balance = balance;
 		this.clientID = clientID;
 	}
@@ -26,12 +26,12 @@ public class Account {
 		this.accountNumber = accountNumber;
 	}
 
-	public String getAccountType() {
-		return accountType;
+	public int getAccountType() {
+		return accountTypeID;
 	}
 
-	public void setAccountType(String accountType) {
-		this.accountType = accountType;
+	public void setAccountType(int accountTypeID) {
+		this.accountTypeID = accountTypeID;
 	}
 
 	public float getBalance() {
@@ -52,7 +52,7 @@ public class Account {
 
 	@Override
 	public String toString() {
-		return "Account [accountNumber=" + accountNumber + ", accountType=" + accountType + ", balance=" + balance
+		return "Account [accountNumber=" + accountNumber + ", accountType=" + accountTypeID + ", balance=" + balance
 				+ ", clientID=" + clientID + "]";
 	}
 

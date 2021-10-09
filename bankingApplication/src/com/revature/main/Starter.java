@@ -1,16 +1,21 @@
 package com.revature.main;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
+import com.mysql.cj.jdbc.result.ResultSetMetaData;
 import com.revature.entity.Client;
 import com.revature.sandersBankingExceptions.UserCredentialsNotValid;
 
 import java.sql.Connection;
-import java.util.Date;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Scanner;
 
@@ -20,6 +25,8 @@ public class Starter {
 	private static Statement statement = null;
 	private static PreparedStatement preparedStmt = null;
 	private static ResultSet result = null;
+	ResultSetMetaData rsmd = null;
+	Scanner input = new Scanner(System.in);
 
 	public static void connect() throws Exception {
 		Class.forName("com.mysql.cj.jdbc.Driver");
@@ -29,10 +36,11 @@ public class Starter {
 
 	public static int createClient(Client client) throws Exception {
 		int insertStatus = 0;
-		String insertQuery = "INSERT INTO account (`FirstName, `LastName`, `UserName`,`Password`,"
+		String insertQuery = "INSERT INTO client (`FirstName`, `LastName`, `UserName`,`Password`,"
 				+ "`Email`, `Age`, `Gender`, `Race`, `Street`, `City`, `State`, "
 				+ "`PostalCode`, `DateJoined`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?);";
-		preparedStmt = connection.prepareStatement(insertQuery);
+		System.out.print(insertQuery);
+		preparedStmt = connection.prepareStatement(insertQuery.toString());
 
 		preparedStmt.setString(1, client.getFirstName());
 		preparedStmt.setString(2, client.getLastName());
@@ -46,12 +54,45 @@ public class Starter {
 		preparedStmt.setString(10, client.getCity());
 		preparedStmt.setString(11, client.getState());
 		preparedStmt.setInt(12, client.getPostalCode());
-		preparedStmt.setDate(13, (java.sql.Date) client.getDateJoined());
+		preparedStmt.setDate(13, client.getDateJoined());
 		insertStatus = preparedStmt.executeUpdate();
 
 		System.out.println("Account created.");
 
 		return insertStatus;
+	}
+
+	public static boolean loginUser(String userName, String password) throws SQLException {
+		boolean validCredentials = false;
+		String readCredentialsQuery = "SELECT COUNT(*) FROM `client` WHERE `userName` = '"+ userName +"' AND `password` = '" + password +"';";
+		statement = connection.createStatement();
+		System.out.println(readCredentialsQuery);
+//		preparedStmt.setString(1, userName);
+//		preparedStmt.setString(2,password);
+		result = statement.executeQuery(readCredentialsQuery);
+
+		int counter = 1;
+		
+
+		while (counter < 3) {
+			if (result.toString() == "1") {
+				counter = 3;
+				validCredentials = true;
+			} else {
+				System.out.print("Invalid User\n Try again.");
+				counter++;
+				validCredentials = false;
+
+			}
+		}
+		return validCredentials;
+	}
+	
+	public static String userName(String userName, String password) throws SQLException {
+		String readName = "SELECT firstName FROM client WHERE userName = ? AND password = ?;";
+		statement = connection.createStatement();
+		result = statement.executeQuery(readName);
+		return result.toString();
 	}
 
 	public static void closeResource() throws Exception {
@@ -96,26 +137,27 @@ public class Starter {
 
 			// Scanner input2 = new Scanner(System.in);
 
-//				System.out.println("Enter your username:");
-//				String userNameValidation = input.next();
-//				System.out.println("Enter your password:");
-//				String passwordValidation = input.next();
-//
-//				if (userNameValidation.equals(userName) && passwordValidation.equals(password)) {
-//					System.out.println("Welcome " + name + ". What would you like to do?\n");
-//					System.out.println("\t1) Make a deposit");
-//					System.out.println("\t2) Make a withdrawl");
-//					System.out.println("\t3) Exit\n");
-//
-//					System.out.println("Enter you choice [1-3]:");
-//
-//					choice = input.nextInt();
-//				} else {
-//					input.close();
-//					throw new UserCredentialsNotValid("User credentials entered are not valid. /n Please try again.");
-//				}
+			System.out.println("Enter your username:");
+			String userNameValidation = input.next();
+			System.out.println("Enter your password:");
+			String passwordValidation = input.next();
+			Boolean validUser = Starter.loginUser(userNameValidation, passwordValidation);
+			if (validUser) {
+				System.out.println("Welcome " + Starter.userName(userNameValidation, passwordValidation) + ". What would you like to do?\n");
+				System.out.println("\t1) Make a deposit");
+				System.out.println("\t2) Make a withdrawl");
+				System.out.println("\t3) Exit\n");
 
-			break;
+				System.out.println("Enter you choice [1-3]:");
+
+				choice = input.nextInt();
+			} 
+				//else {
+//				input.close();
+//				throw new UserCredentialsNotValid("User credentials entered are not valid. /n Please try again.");
+//			}
+
+			
 		case 2:
 
 			// Scanner input3 = new Scanner(System.in);
@@ -133,118 +175,125 @@ public class Starter {
 			String city = "";
 			String state = "";
 			int postalCode = 0;
-			Date dateJoined = new Date();
-			
-			
+			Date dateJoined = Date.valueOf(LocalDate.now());
 
 			Client client = new Client();
 
 			client.setDateJoined(dateJoined);
-			
+
 			while (firstName.isEmpty()) {
-				System.out.print("Enter your first name: ");
+				System.out.println("Enter your first name: ");
 				firstName = input.nextLine();
 				if (firstName.isEmpty()) {
-					System.out.print("This is a required field.\n");
+					System.out.println("This is a required field.\n");
 				}
 			}
-			
+
 			client.setFirstName(firstName);
 
 			while (lastName.isEmpty()) {
 				System.out.println("Enter your last name: ");
 				lastName = input.nextLine();
 				if (lastName.isEmpty()) {
-					System.out.print("This is a required field.\n");
+					System.out.println("This is a required field.\n");
 				}
 			}
-			
+
 			client.setLastName(lastName);
 
 			while (email.isEmpty()) {
-				System.out.print("Enter your email: ");
+				System.out.println("Enter your email: ");
 				email = input.nextLine();
 				if (email.isEmpty()) {
-					System.out.print("This is a required field\n");
+					System.out.println("This is a required field\n");
 				}
 			}
-			
+
 			client.setEmail(email);
 
 			while (age == 0) {
-				System.out.print("Enter your age:");
+				System.out.println("Enter your age:");
 				age = input.nextInt();
+				input.nextLine();
 				if (age >= 0 && age < 18) {
-					System.out.print("You need to be at least 18 to sign up.\n");
+					age = 0;
+					System.out.println("You need to be at least 18 to sign up.\n");
 				} else if (age < 0) {
-					System.out.print("This entry is not a valid age.");
+					age = 0;
+					System.out.println("This entry is not a valid age.");
 				} else if (age == 0) {
-					System.out.print("This is a required field.");
+					System.out.println("This is a required field.");
 				}
 			}
-			
+
 			client.setAge(age);
-			
-			System.out.print("What is your gender? Leave this field blank if you wish not to answer.");
-			userName = input.nextLine();
+
+			System.out.println("What is your gender? Leave this field blank if you wish not to answer.");
+			try {
+				gender = input.nextLine();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			client.setGender(gender);
-			
-			System.out.print("What is your race? Leave this field blank if you wish not to answer.");
+
+			System.out.println("What is your race? Leave this field blank if you wish not to answer.");
 			race = input.nextLine();
-			client.setUserName(race);
-			
+			client.setRace(race);
+
 			while (street.isEmpty()) {
-				System.out.print("Enter your street address: ");
+				System.out.println("Enter your street address: ");
 				street = input.nextLine();
 				if (street.isEmpty()) {
-					System.out.print("This is a required field\n");
+					System.out.println("This is a required field\n");
 				}
 			}
-			
+
 			client.setStreet(street);
-			
+
 			while (city.isEmpty()) {
-				System.out.print("Enter your city: ");
+				System.out.println("Enter your city: ");
 				city = input.nextLine();
 				if (city.isEmpty()) {
-					System.out.print("This is a required field\n");
+					System.out.println("This is a required field\n");
 				}
 			}
-			
+
 			client.setCity(city);
 
 			while (state.isEmpty()) {
-				System.out.print("Enter your state: ");
+				System.out.println("Enter your state: ");
 				state = input.nextLine();
 				if (state.isEmpty()) {
-					System.out.print("This is a required field\n");
+					System.out.println("This is a required field\n");
 				}
 			}
-			
+
 			client.setState(state);
-			
+
 			while (postalCode == 0) {
-				System.out.print("Enter your postal code: ");
+				System.out.println("Enter your postal code: ");
 				postalCode = input.nextInt();
+				input.nextLine();
 				if (postalCode == 0) {
-					System.out.print("This is a required field\n");
+					System.out.println("This is a required field\n");
 				} else if (postalCode < 0) {
-					System.out.print("This is not a valid postal code");
+					System.out.println("This is not a valid postal code");
 				}
 			}
-			
+
 			client.setPostalCode(postalCode);
 
 			while (userName.isEmpty()) {
-				System.out.print("Enter your username: ");
+				System.out.println("Enter your username: ");
 				userName = input.nextLine();
 				if (userName.isEmpty()) {
-					System.out.print("This is a required field\n");
+					System.out.println("This is a required field\n");
 				}
 			}
-			
+
 			client.setUserName(userName);
-			
+
 			while (password.isEmpty()) {
 
 				System.out.println("Enter a password: \n");
@@ -255,13 +304,16 @@ public class Starter {
 				if (password != "" && password == passwordReEnter) {
 
 					System.out.println("Passwords are not matching. Please try again.");
-				} 
+				}
 			}
-			
+
 			client.setPassword(password);
-			
-			
+			System.out.println(client.toString());
+
 			Starter.createClient(client);
+			Starter.closeResource();
+//			Starter obj = new Starter();
+//			obj.insert("Client");
 			break;
 		case 3:
 			System.out.println("Thank you for using our application.");
