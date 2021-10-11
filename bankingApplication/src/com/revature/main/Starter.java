@@ -7,6 +7,7 @@ import java.util.Scanner;
 import com.mysql.cj.jdbc.result.ResultSetMetaData;
 import com.revature.entity.Client;
 import com.revature.entity.Transactions;
+import com.revature.entity.Account;
 import com.revature.entity.AccountType;
 import com.revature.sandersBankingExceptions.UserCredentialsNotValid;
 
@@ -24,10 +25,10 @@ import java.util.Scanner;
 
 public class Starter {
 
-	private static Connection connection = null;
-	private static Statement statement = null;
-	private static PreparedStatement preparedStmt = null;
-	private static ResultSet result = null;
+	static Connection connection = null;
+	static Statement statement = null;
+	static PreparedStatement preparedStmt = null;
+	static ResultSet result = null;
 	private static java.sql.ResultSetMetaData rsmd = null;
 	private static Scanner input = new Scanner(System.in);
 
@@ -63,39 +64,6 @@ public class Starter {
 		System.out.println("Account created.");
 
 		return insertStatus;
-	}
-
-	private static int counter = 1;
-
-	public static boolean loginUser(String userName, String password) throws SQLException {
-		boolean validCredentials = false;
-		String readCredentialsQuery = "SELECT COUNT(*) AS Count FROM `client` WHERE `userName` = '" + userName
-				+ "' AND `password` = '" + password + "';";
-		statement = connection.createStatement();
-		result = statement.executeQuery(readCredentialsQuery);
-		result.next();
-
-		while (counter < 4) {
-			if (result.getInt("Count") == 1) {
-				counter = 4;
-				validCredentials = true;
-			} else if (counter < 3 && counter > 0) {
-				System.out.print("Invalid User\n Try again.\n\n");
-				System.out.println("Enter your username:");
-				String userNameValidation = input.nextLine();
-				System.out.println("Enter your password:");
-				String passwordValidation = input.nextLine();
-				counter++;
-				Starter.loginUser(userNameValidation, passwordValidation);
-
-				validCredentials = false;
-			} else {
-				// System.out.print("Maximum Attempts Exceeded.");
-				throw new UserCredentialsNotValid("Exceded maximum attemps.");
-			}
-		}
-
-		return validCredentials;
 	}
 
 	public static void insert(String tableName) {
@@ -150,48 +118,35 @@ public class Starter {
 		}
 	}
 
-	public static int deposit(Transactions transactions) throws Exception {
-		int insertStatus = 0;
-		String insertQuery = "INSERT INTO transactions (`AccountNumber`,`TransType`, `Amount`, `TransTimeStamp`) VALUES (?,?,?,?);";
-		System.out.print(insertQuery);
-		preparedStmt = connection.prepareStatement(insertQuery);
 
-		preparedStmt.setInt(1, transactions.getAccountNumber());
-		preparedStmt.setString(2, transactions.getTransType());
-		preparedStmt.setFloat(3, transactions.getAmount());
-		preparedStmt.setDate(4, transactions.getTransTimeStamp());
-		insertStatus = preparedStmt.executeUpdate();
-		return insertStatus;
-	}
-
-	public static void accountSelection(Transactions transaction, String userNameValidation, int accountNumber,
-			float amount, String accountName) throws Exception {
-		String accountNumberQuery = "SELECT AccountNumber FROM bankingapplication.account "
-				+ "WHERE AccountTypeId = (SELECT AccountTypeId FROM accounttype WHERE AccountName = '" + accountName
-				+ "') " + "AND ClientID = (SELECT ClientID FROM client WHERE UserName = '" + userNameValidation + "');";
+	public static int updateBalance(Account account, float amount, int accountNumber, String transType)
+			throws Exception {
+		String balanceQuery = "SELECT `Balance` FROM `account` WHERE `AccountNumber` = " + accountNumber + ";";
+		System.out.print(balanceQuery);
 		statement = connection.createStatement();
-		result = statement.executeQuery(accountNumberQuery);
-		//System.out.print(accountNumber);
-		
-		if (result.next() == false) {
-			System.out.println("You do not have an existing " + accountName.toLowerCase() + " account.");
-		} else {
-			accountNumber = result.getInt("AccountNumber");
-			transaction.setAccountNumber(accountNumber);
-			transaction.setTransType("Deposit");
-			transaction.setTransTimeStamp(Date.valueOf(LocalDate.now()));
+		result = statement.executeQuery(balanceQuery);
+		result.next();
+		float balance = result.getInt("Balance");
 
-			while (amount == 0.00) {
-				System.out.println("Enter the amount to deposit: ");
-				amount = input.nextFloat();
-				input.nextLine();
-				if (amount == 0.00) {
-					System.out.println("This is a required field\n");
-				}
-				transaction.setAmount(amount);
-				Starter.deposit(transaction);
-			}
+		if (transType == "Deposit") {
+			balance = balance + amount;
+		} else if (transType == "Withdraw") {
+			balance = balance - amount;
 		}
+
+		String updateQuery = "UPDATE `account` SET `Balance` = " + balance + " WHERE `AccountNumber` = " + accountNumber
+				+ ";"; // creating a query
+		System.out.print(updateQuery);
+		preparedStmt = connection.prepareStatement(updateQuery); // creating prepared Statement
+//		preparedStmt.setFloat(1, account.getBalance());
+//		preparedStmt.setInt(2, account.getAccountNumber());
+
+		int updateStatus = 0;
+		if (balance >= 0) {
+			updateStatus = preparedStmt.executeUpdate();
+		}
+
+		return updateStatus;
 	}
 
 	public static String userName(String userName, String password) throws SQLException {
@@ -200,8 +155,7 @@ public class Starter {
 		statement = connection.createStatement();
 		result = statement.executeQuery(readName);
 		result.next();
-//		rsmd = result.getMetaData();
-//		String name = rsmd.getColumnName(1);
+
 		return result.getString("firstName");
 	}
 
@@ -222,94 +176,21 @@ public class Starter {
 	}
 
 	public static void main(String[] args) throws Exception {
-		// TODO Auto-generated method stub
-//			String name = "Austin";
-//			String userName = "austin";
-//			String password = "password";
-//		Scanner input = new Scanner(System.in);
+
 		Starter.connect();
 		int choice = 0;
-		// while (choice >=0) {
-
-		System.out.println("\t\t *************Sanders Banking Application***************");
-		System.out.println("\t1) Login");
-		System.out.println("\t2) Sign Up");
-		System.out.println("\t3) Exit");
-
-		System.out.println("Enter you choice [1-3]:");
-
-		// }
-		choice = input.nextInt();
-		input.nextLine();
-
-		// input.close();
+		choice = MainMenu.mainMenu();
 		switch (choice) {
+
 		case 1:
-
-			// Scanner input2 = new Scanner(System.in);
-
 			System.out.println("Enter your username:");
-			String userNameValidation = input.nextLine();
+			String userName = input.nextLine();
 			System.out.println("Enter your password:");
-			String passwordValidation = input.nextLine();
-			Boolean validUser = Starter.loginUser(userNameValidation, passwordValidation);
-			System.out.println(validUser);
+			String password = input.nextLine();
+			Boolean validUser = Login.loginUser(statement, result, connection, userName, password, input);
+
 			if (validUser) {
-				System.out.println("Welcome " + Starter.userName(userNameValidation, passwordValidation)
-						+ ". What would you like to do?\n");
-				System.out.println("\t1) Make a deposit");
-				System.out.println("\t2) Make a withdrawl");
-				System.out.println("\t3) Open a new account");
-				System.out.println("\t4) Exit\n");
-
-				System.out.println("Enter your choice [1-4]:");
-
-				choice = input.nextInt();
-				input.nextLine();
-				Transactions transaction = new Transactions();
-				int accountNumber = 0;
-				String transType = null;
-				float amount = 0.00f;
-				Date TransTimeStamp = null;
-
-				switch (choice) {
-				case 1:
-
-					System.out.println("Select the account where you would like to make the deposit:");
-					System.out.println("\t1) Checking");
-					System.out.println("\t2) Savings");
-					System.out.println("\t3) Loan");
-					System.out.println("\t4) Credit");
-					System.out.println("\t5) Exit");
-
-					System.out.println("Make your choice [1-5]");
-					int choice2 = input.nextInt();
-
-					switch (choice2) {
-					case 1:
-
-						Starter.accountSelection(transaction, userNameValidation, accountNumber, amount, "Checking");
-						break;
-					case 2:
-						Starter.accountSelection(transaction, userNameValidation, accountNumber, amount, "Savings");
-						break;
-					case 3:
-						Starter.accountSelection(transaction, userNameValidation, accountNumber, amount, "Loan");
-						break;
-					case 4:
-						Starter.accountSelection(transaction, userNameValidation, accountNumber, amount, "Credit");
-						break;
-					case 5:
-						closeResource();
-						System.exit(0);
-						break;
-					}
-
-					// }
-//			else {
-////				input.close();
-//			throw new UserCredentialsNotValid("User credentials entered are not valid. /n Please try again.");
-				}
+				Operations.operations(userName, password, input);	
 			}
 
 		case 2:
@@ -318,8 +199,8 @@ public class Starter {
 
 			String firstName = "";
 			String lastName = "";
-			String userName = "";
-			String password = "";
+			userName = "";
+			password = "";
 			String passwordReEnter = "";
 			String email = "";
 			int age = 0;
