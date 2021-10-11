@@ -25,17 +25,17 @@ public class Login {
 				counter = 4;
 				validCredentials = true;
 			} else if (counter < 3 && counter > 0) {
-				System.out.print("Invalid User\n Try again.\n\n");
+				System.out.print("\nInvalid User.\n\nTry again.\n\n");
 				System.out.println("Enter your username:");
-				userName = input.nextLine();
+				userName = input.next();
 				System.out.println("Enter your password:");
-				password = input.nextLine();
+				password = input.next();
 				counter++;
 				loginUser(statement, result, connection, userName, password, input);
 
 				validCredentials = false;
 			} else {
-				// System.out.print("Maximum Attempts Exceeded.");
+				System.out.print("Maximum Attempts Exceeded.\n");
 				throw new UserCredentialsNotValid("Exceded maximum attempts.");
 			}
 		}

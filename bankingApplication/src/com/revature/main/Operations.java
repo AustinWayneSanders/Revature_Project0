@@ -66,6 +66,41 @@ public class Operations {
 //				break;
 //			}
 			break;
+		case 3:
+			System.out.print("What type of account would you like to open?\n");
+			System.out.print("\t1) Checking\n");
+			System.out.print("\t2) Savings\n");
+			System.out.print("\t3) Loan\n");
+			System.out.print("\t4) Security Deposit\n");
+			System.out.print("\t5) Credit\n");
+			System.out.print("\t6) Return to previous menu\n");
+			System.out.print("Enter your choice [1-6]");
+			
+			String accountName = new String();
+			int accountSelection = input.nextInt();
+			switch (accountSelection) {
+			case 1: 
+				accountName = "Checking";
+				break;
+			case 2: 
+				accountName = "Savings";
+				break;
+			case 3:
+				accountName = "Loan";
+				break;
+			case 4: 
+				accountName = "Security Deposit";
+				break;
+			case 5: 
+				accountName = "Credit";
+				break;
+			case 6: 
+				operations(userNameValidation, passwordValidation, input);
+				break;
+			}
+			
+			CreateAccount.insertNewAccount(userNameValidation, accountName);
+			
 		case 4:
 			MainMenu.start();
 			break;

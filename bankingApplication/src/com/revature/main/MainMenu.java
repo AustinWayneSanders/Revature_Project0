@@ -32,7 +32,7 @@ public class MainMenu {
 			if (validUser) {
 				Operations.operations(userName, password, input);	
 			}
-			
+			break;
 		case 2:
 
 			// Scanner input3 = new Scanner(System.in);
