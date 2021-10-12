@@ -76,8 +76,6 @@ public class Transaction {
 
 	public static void transactionalChoices(String userNameValidation, int accountNumber, float amount,
 			String transType, Scanner input) throws Exception {
-//		int choice = 1;
-//		while (choice == 1) { 
 		System.out.println("Select the account where you would like to make the " + transType.toLowerCase() + ":");
 		System.out.println("\t1) Checking");
 		System.out.println("\t2) Savings");
@@ -92,38 +90,18 @@ public class Transaction {
 		case 1:
 			applyTransaction(userNameValidation, accountNumber, amount, "Checking", transType, Starter.statement,
 					Starter.result, Starter.connection, input);
-//			System.out.print("Would you like to make another transaction?");
-//			System.out.print("\t1) Yes");
-//			System.out.print("\t2) No");
-//			choice = input.nextInt();
-//			input.nextLine();
 			break;
 		case 2:
 			applyTransaction(userNameValidation, accountNumber, amount, "Savings", transType, Starter.statement,
 					Starter.result, Starter.connection, input);
-//			System.out.print("Would you like to make another transaction?");
-//			System.out.print("\t1) Yes");
-//			System.out.print("\t2) No");
-//			choice = input.nextInt();
-//			input.nextLine();
 			break;
 		case 3:
 			applyTransaction(userNameValidation, accountNumber, amount, "Loan", transType, Starter.statement,
 					Starter.result, Starter.connection, input);
-//			System.out.print("Would you like to make another transaction?");
-//			System.out.print("\t1) Yes");
-//			System.out.print("\t2) No");
-//			choice = input.nextInt();
-//			input.nextLine();
 			break;
 		case 4:
 			applyTransaction(userNameValidation, accountNumber, amount, "Credit", transType, Starter.statement,
 					Starter.result, Starter.connection, input);
-//			System.out.print("Would you like to make another transaction?");
-//			System.out.print("\t1) Yes");
-//			System.out.print("\t2) No");
-//			choice = input.nextInt();
-//			input.nextLine();
 			break;
 		case 5:
 			Starter.closeResource();
@@ -131,8 +109,6 @@ public class Transaction {
 			break;
 		}
 
-//		}
-//		MainMenu.mainMenu();
 	}
 
 	public static void transferFunds(String userNameValidation, int accountNumber, float amount, String accountNameFrom,
@@ -147,7 +123,6 @@ public class Transaction {
 		statement = connection.createStatement();
 		result = statement.executeQuery(accountNumberQuery1);
 		result.next();
-		// System.out.print(accountNumber);
 
 		if (result.getInt("NumAccounts") != 2) {
 			System.out.println("At least one of the accounts you selected does not exist.");

@@ -1,5 +1,6 @@
 package com.revature.main;
 
+import java.io.Console;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Scanner;
@@ -8,6 +9,14 @@ import com.revature.entity.Client;
 
 public class MainMenu {
 	public static void start() throws Exception {
+		
+		Console console = System.console();
+//		if (console == null) {
+//			System.out.println("Couldn't get Console instance");
+//			System.exit(0);
+//		}
+		PasswordAuthentication pa = new PasswordAuthentication();
+		String password = new String();
 		Scanner input = new Scanner(System.in);
 		System.out.println(" *************Sanders Banking Application***************");
 		System.out.println("\t1) Login");
@@ -25,9 +34,17 @@ public class MainMenu {
 		case 1:
 			System.out.println("Enter your username:");
 			String userName = input.next();
+//			char[] passwordArray = console.readPassword("Enter your secret password: ");
+//			console.printf("Password entered was: %s%n", new String(passwordArray));
 			System.out.println("Enter your password:");
-			String password = input.next();
-			boolean validUser = Login.loginUser(Starter.statement, Starter.result, Starter.connection, userName, password, input);
+			password = input.next();
+			char[] pwdArray = new char[password.length()];
+			  
+	        // Copy character by character into array
+	        for (int i = 0; i < password.length(); i++) {
+	            pwdArray[i] = password.charAt(i);
+	        }
+			boolean validUser = Login.loginUser(Starter.statement, Starter.result, Starter.connection, userName, pwdArray, input);
 
 			if (validUser) {
 				Operations.operations(userName, password, input);	
@@ -168,7 +185,6 @@ public class MainMenu {
 			}
 
 			client.setUserName(userName);
-
 			while (password.isEmpty()) {
 
 				System.out.println("Enter a password: \n");
@@ -181,8 +197,17 @@ public class MainMenu {
 					System.out.println("Passwords are not matching. Please try again.");
 				}
 			}
-
-			client.setPassword(password);
+			
+			// Creating array of string length
+	        char[] pwdArray2 = new char[password.length()];
+	  
+	        // Copy character by character into array
+	        for (int i = 0; i < password.length(); i++) {
+	            pwdArray2[i] = password.charAt(i);
+	        }
+			
+			
+			client.setPassword(pa.hash(pwdArray2));
 			System.out.println(client.toString());
 
 			Starter.createClient(client);
@@ -197,4 +222,8 @@ public class MainMenu {
 
 		}
 	}
+	
+//	public static void main(String[] args) throws Exception {
+//		new MainMenu().start();
+//	}
 }
