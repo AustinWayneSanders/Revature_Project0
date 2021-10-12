@@ -176,7 +176,7 @@ public class MainMenu {
 				System.out.println("Re-enter password: \n");
 				passwordReEnter = input.nextLine();
 
-				if (password != "" && password == passwordReEnter) {
+				if (!password.isEmpty() && password != passwordReEnter) {
 
 					System.out.println("Passwords are not matching. Please try again.");
 				}

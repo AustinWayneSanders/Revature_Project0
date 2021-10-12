@@ -33,7 +33,7 @@ public class Login {
 				counter++;
 				loginUser(statement, result, connection, userName, password, input);
 
-				validCredentials = false;
+				//validCredentials = false;
 			} else {
 				System.out.print("Maximum Attempts Exceeded.\n");
 				throw new UserCredentialsNotValid("Exceded maximum attempts.");

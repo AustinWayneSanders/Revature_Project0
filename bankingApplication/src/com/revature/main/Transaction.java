@@ -13,8 +13,9 @@ import com.revature.entity.Transactions;
 
 public class Transaction {
 	private static Transactions transactions = new Transactions();
+
 	public static int updateTransactions(PreparedStatement preparedStmt, Connection connection) throws Exception {
-		
+
 		int insertStatus = 0;
 		String insertQuery = "INSERT INTO transactions (`AccountNumber`,`TransType`, `Amount`, `TransTimeStamp`) VALUES (?,?,?,?);";
 		System.out.print(insertQuery);
@@ -27,9 +28,11 @@ public class Transaction {
 		insertStatus = preparedStmt.executeUpdate();
 		return insertStatus;
 	}
-	
-	public static void applyTransaction(String userNameValidation, int accountNumber,
-			float amount, String accountName, String transType, Statement statement, ResultSet result, Connection connection, Scanner input) throws Exception {
+
+	public static void applyTransaction(String userNameValidation, int accountNumber, float amount, String accountName,
+			String transType, Statement statement, ResultSet result, Connection connection, Scanner input)
+			throws Exception {
+
 		String accountNumberQuery = "SELECT AccountNumber FROM bankingapplication.account "
 				+ "WHERE AccountTypeId = (SELECT AccountTypeId FROM accounttype WHERE AccountName = '" + accountName
 				+ "') " + "AND ClientID = (SELECT ClientID FROM client WHERE UserName = '" + userNameValidation + "');";
@@ -64,12 +67,15 @@ public class Transaction {
 				} else if (status == 0) {
 					System.out.print("We were unable to process this transaction. Insufficent funds.\n");
 				}
+
 			}
+
 		}
+
 	}
 
-	public static void transactionalChoices(String userNameValidation, int accountNumber,
-			float amount, String transType, Scanner input) throws Exception {
+	public static void transactionalChoices(String userNameValidation, int accountNumber, float amount,
+			String transType, Scanner input) throws Exception {
 //		int choice = 1;
 //		while (choice == 1) { 
 		System.out.println("Select the account where you would like to make the " + transType.toLowerCase() + ":");
@@ -84,7 +90,8 @@ public class Transaction {
 
 		switch (choice2) {
 		case 1:
-			applyTransaction(userNameValidation, accountNumber, amount, "Checking", transType, Starter.statement, Starter.result, Starter.connection, input);
+			applyTransaction(userNameValidation, accountNumber, amount, "Checking", transType, Starter.statement,
+					Starter.result, Starter.connection, input);
 //			System.out.print("Would you like to make another transaction?");
 //			System.out.print("\t1) Yes");
 //			System.out.print("\t2) No");
@@ -92,7 +99,8 @@ public class Transaction {
 //			input.nextLine();
 			break;
 		case 2:
-			applyTransaction(userNameValidation, accountNumber, amount, "Savings", transType, Starter.statement, Starter.result, Starter.connection, input);
+			applyTransaction(userNameValidation, accountNumber, amount, "Savings", transType, Starter.statement,
+					Starter.result, Starter.connection, input);
 //			System.out.print("Would you like to make another transaction?");
 //			System.out.print("\t1) Yes");
 //			System.out.print("\t2) No");
@@ -100,7 +108,8 @@ public class Transaction {
 //			input.nextLine();
 			break;
 		case 3:
-			applyTransaction(userNameValidation, accountNumber, amount, "Loan", transType, Starter.statement, Starter.result, Starter.connection, input);
+			applyTransaction(userNameValidation, accountNumber, amount, "Loan", transType, Starter.statement,
+					Starter.result, Starter.connection, input);
 //			System.out.print("Would you like to make another transaction?");
 //			System.out.print("\t1) Yes");
 //			System.out.print("\t2) No");
@@ -108,7 +117,8 @@ public class Transaction {
 //			input.nextLine();
 			break;
 		case 4:
-			applyTransaction(userNameValidation, accountNumber, amount, "Credit", transType, Starter.statement, Starter.result, Starter.connection, input);
+			applyTransaction(userNameValidation, accountNumber, amount, "Credit", transType, Starter.statement,
+					Starter.result, Starter.connection, input);
 //			System.out.print("Would you like to make another transaction?");
 //			System.out.print("\t1) Yes");
 //			System.out.print("\t2) No");
@@ -120,8 +130,78 @@ public class Transaction {
 			System.exit(0);
 			break;
 		}
+
 //		}
 //		MainMenu.mainMenu();
 	}
-	
+
+	public static void transferFunds(String userNameValidation, int accountNumber, float amount, String accountNameFrom,
+			String accountNameTo, String transType, Statement statement, ResultSet result, Connection connection,
+			Scanner input) throws Exception {
+		int status = 0;
+		String accountNumberQuery1 = "SELECT COUNT(AccountNumber) AS NumAccounts FROM bankingapplication.account "
+				+ "WHERE AccountTypeId in (SELECT AccountTypeId FROM accounttype WHERE AccountName = '"
+				+ accountNameFrom + "' OR AccountName = '" + accountNameTo + "') "
+				+ "AND ClientID = (SELECT ClientID FROM client WHERE UserName = '" + userNameValidation + "');";
+		System.out.print(accountNumberQuery1);
+		statement = connection.createStatement();
+		result = statement.executeQuery(accountNumberQuery1);
+		result.next();
+		// System.out.print(accountNumber);
+
+		if (result.getInt("NumAccounts") != 2) {
+			System.out.println("At least one of the accounts you selected does not exist.");
+		} else if (result.getInt("NumAccounts") == 2) {
+			String accountNumberQuery2 = "SELECT AccountNumber FROM bankingapplication.account "
+					+ "WHERE AccountTypeId = (SELECT AccountTypeId FROM accounttype WHERE AccountName = '"
+					+ accountNameFrom + "') " + "AND ClientID = (SELECT ClientID FROM client WHERE UserName = '"
+					+ userNameValidation + "');";
+			System.out.print(accountNumberQuery2);
+			statement = connection.createStatement();
+			result = statement.executeQuery(accountNumberQuery2);
+			result.next();
+			accountNumber = result.getInt("AccountNumber");
+			transactions.setAccountNumber(accountNumber);
+			transactions.setTransType(transType);
+			transactions.setTransTimeStamp(Date.valueOf(LocalDate.now()));
+
+			while (amount == 0.00) {
+				System.out.println("Enter the amount to " + transType + ": ");
+				amount = input.nextFloat();
+				input.nextLine();
+				if (amount == 0.00) {
+					System.out.println("This is a required field\n");
+				}
+				transactions.setAmount(amount);
+				updateTransactions(Starter.preparedStmt, Starter.connection);
+				Account account = new Account();
+
+				status = Starter.updateBalance(account, amount, accountNumber, "Withdraw");
+
+				if (status == 1) {
+					String accountNumberQuery3 = "SELECT AccountNumber FROM bankingapplication.account "
+							+ "WHERE AccountTypeId = (SELECT AccountTypeId FROM accounttype WHERE AccountName = '"
+							+ accountNameTo + "') " + "AND ClientID = (SELECT ClientID FROM client WHERE UserName = '"
+							+ userNameValidation + "');";
+					System.out.print(accountNumberQuery3);
+					statement = connection.createStatement();
+					result = statement.executeQuery(accountNumberQuery3);
+					result.next();
+					accountNumber = result.getInt("AccountNumber");
+					transactions.setAccountNumber(accountNumber);
+					transactions.setTransType(transType);
+					transactions.setTransTimeStamp(Date.valueOf(LocalDate.now()));
+					transactions.setAmount(amount);
+					updateTransactions(Starter.preparedStmt, Starter.connection);
+					Starter.updateBalance(account, amount, accountNumber, "Deposit");
+					System.out.print("Transaction Successful!\n");
+				} else if (status == 0) {
+					System.out.print("We were unable to process this transaction. Insufficent funds.\n");
+				}
+
+			}
+
+		}
+	}
+
 }

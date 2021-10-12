@@ -1,7 +1,10 @@
 package com.revature.main;
 
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Scanner;
 
 import com.revature.entity.Transactions;
@@ -21,10 +24,11 @@ public class Operations {
 				+ ". What would you like to do?\n");
 		System.out.println("\t1) Make a deposit");
 		System.out.println("\t2) Make a withdrawl");
-		System.out.println("\t3) Open a new account");
-		System.out.println("\t4) Log out\n");
+		System.out.println("\t3) Transfer funds");
+		System.out.println("\t4) Open a new account");
+		System.out.println("\t5) Log out\n");
 
-		System.out.println("Enter your choice [1-4]:");
+		System.out.println("Enter your choice [1-5]:");
 
 		choice1 = input.nextInt();
 		input.nextLine();
@@ -66,7 +70,67 @@ public class Operations {
 //				break;
 //			}
 			break;
+		
 		case 3:
+			
+			transType = "Transfer";
+			System.out.print("Select the account from which you would like to make the transfer: \n");
+			System.out.println("\t1) Checking");
+			System.out.println("\t2) Savings");
+			System.out.println("\t3) Loan");
+			System.out.println("\t4) Credit");
+			
+			String accountNameFrom = new String();
+			int accountSelection1 = input.nextInt();
+			
+			switch (accountSelection1) {
+			case 1: 
+				accountNameFrom = "Checking";
+				break;
+			case 2: 
+				accountNameFrom = "Savings";
+				break;
+			case 3:
+				accountNameFrom = "Loan";
+				break;
+			case 4: 
+				accountNameFrom = "Security Deposit";
+				break;
+			case 5: 
+				accountNameFrom = "Credit";
+				break;
+			}
+			
+			System.out.print("Select the account to which you would like to make the transfer: \n");
+			System.out.println("\t1) Checking");
+			System.out.println("\t2) Savings");
+			System.out.println("\t3) Loan");
+			System.out.println("\t4) Credit");
+			
+			String accountNameTo = new String();
+			int accountSelection2 = input.nextInt();
+			
+			switch (accountSelection2) {
+			case 1: 
+				accountNameTo = "Checking";
+				break;
+			case 2: 
+				accountNameTo = "Savings";
+				break;
+			case 3:
+				accountNameTo = "Loan";
+				break;
+			case 4: 
+				accountNameTo = "Security Deposit";
+				break;
+			case 5: 
+				accountNameTo = "Credit";
+				break;
+			}
+			Transaction.transferFunds(userNameValidation, accountNumber, amount, accountNameFrom, accountNameTo, transType, Starter.statement, Starter.result, Starter.connection, input);
+		break;	
+		
+		case 4:
 			System.out.print("What type of account would you like to open?\n");
 			System.out.print("\t1) Checking\n");
 			System.out.print("\t2) Savings\n");
@@ -101,7 +165,7 @@ public class Operations {
 			
 			CreateAccount.insertNewAccount(userNameValidation, accountName);
 			
-		case 4:
+		case 5:
 			MainMenu.start();
 			break;
 		}
