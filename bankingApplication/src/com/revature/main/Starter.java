@@ -2,29 +2,31 @@ package com.revature.main;
 
 
 import com.revature.entity.Client;
+import com.mysql.cj.jdbc.result.ResultSetMetaData;
 import com.revature.entity.Account;
 
-import java.security.SecureRandom;
-import java.security.spec.KeySpec;
+//import java.security.SecureRandom;
+//import java.security.spec.KeySpec;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Base64;
-
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
+//import java.util.Base64;
+//
+//import javax.crypto.SecretKeyFactory;
+//import javax.crypto.spec.PBEKeySpec;
 
 
 public class Starter {
 	
-	private static final SecureRandom random = new SecureRandom();
+//	private static final SecureRandom random = new SecureRandom();
 	static Connection connection = null;
 	static Statement statement = null;
 	static PreparedStatement preparedStmt = null;
 	static ResultSet result = null;
+	static ResultSetMetaData rsmd = null;
 	public static void connect() throws Exception {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bankingapplication", "root",
@@ -124,6 +126,6 @@ public class Starter {
 		
 		
 		Starter.connect();
-		MainMenu.start();
+		Main.start();
 	}
 }

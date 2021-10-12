@@ -1,7 +1,12 @@
 package com.revature.main;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Scanner;
 
+import com.mysql.cj.jdbc.result.ResultSetMetaData;
+import com.revature.display.DisplayAccounts;
 import com.revature.entity.Transactions;
 
 public class Operations {
@@ -19,8 +24,9 @@ public class Operations {
 		System.out.println("\t1) Make a deposit");
 		System.out.println("\t2) Make a withdrawl");
 		System.out.println("\t3) Transfer funds");
-		System.out.println("\t4) Open a new account");
-		System.out.println("\t5) Log out\n");
+		System.out.println("\t4) Display account balances");
+		System.out.println("\t5) Open a new account");
+		System.out.println("\t6) Log out\n");
 
 		System.out.println("Enter your choice [1-5]:");
 
@@ -107,7 +113,12 @@ public class Operations {
 			Transaction.transferFunds(userNameValidation, accountNumber, amount, accountNameFrom, accountNameTo, transType, Starter.statement, Starter.result, Starter.connection, input);
 		break;	
 		
-		case 4:
+		case 4: 
+			DisplayAccounts displayAccounts = new DisplayAccounts();
+			displayAccounts.displayAccountByClient("client", userNameValidation, Starter.statement, Starter.connection, Starter.result, Starter.rsmd);
+			break;
+		
+		case 5:
 			System.out.print("What type of account would you like to open?\n");
 			System.out.print("\t1) Checking\n");
 			System.out.print("\t2) Savings\n");
@@ -142,12 +153,12 @@ public class Operations {
 			
 			CreateAccount.insertNewAccount(userNameValidation, accountName);
 			
-		case 5:
-			MainMenu.start();
+		case 6:
+			Main.start();
 			break;
 		}
 		if (choice ==2) {
-		MainMenu.start();
+		Main.start();
 		}
 		}
 	}
